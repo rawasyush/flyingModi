@@ -1,0 +1,35 @@
+name: Build Android APK with Buildozer
+
+on:
+  push:
+    branches: [ main ]  # जैसे ही फाइल सेव होगी, यह चलना शुरू हो जाएगा
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Buildozer Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev
+        pip install --user --upgrade buildozer cython virtualenv
+
+    - name: Build APK with Buildozer
+      run: |
+        export PATH=$PATH:~/.local/bin
+        buildozer android debug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: business-app-apk
+        path: bin/*.apk
